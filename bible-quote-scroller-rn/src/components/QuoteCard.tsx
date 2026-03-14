@@ -19,7 +19,8 @@ import {
   Share,
 } from 'react-native';
 import RenderHtml from 'react-native-render-html';
-import { COLORS, FONTS, SPACING } from '../theme';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS, FONTS, SPACING, RADIUS } from '../theme';
 import type { FeedCard } from '../types';
 
 const { width, height } = Dimensions.get('window');
@@ -67,7 +68,7 @@ export default function QuoteCard({
         <View style={styles.content}>
           {/* Verse Text */}
           <RenderHtml
-            contentWidth={width - 64}
+            contentWidth={width - 100} // leave room for right buttons
             source={{ html: card.content }}
             tagsStyles={tagsStyles}
           />
@@ -76,31 +77,49 @@ export default function QuoteCard({
           <Text style={styles.reference}>{card.reference}</Text>
         </View>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - Tiktok Style Right Side */}
         <View style={styles.actions}>
           <TouchableOpacity onPress={() => onToggleLike(card)} style={styles.actionBtn}>
-            <Text style={[styles.actionIcon, card.liked && styles.likedIcon]}>
-              {card.liked ? '♥' : '♡'}
-            </Text>
+            <View style={styles.iconWrapper}>
+              <Ionicons 
+                name={card.liked ? "heart" : "heart-outline"} 
+                size={28} 
+                color={card.liked ? COLORS.danger : COLORS.textPrimary} 
+              />
+            </View>
+            <Text style={styles.actionLabel}>Like</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => onToggleSave(card)} style={styles.actionBtn}>
-            <Text style={[styles.actionIcon, card.saved && styles.savedIcon]}>
-              {card.saved ? '★' : '☆'}
-            </Text>
+            <View style={styles.iconWrapper}>
+              <Ionicons 
+                name={card.saved ? "bookmark" : "bookmark-outline"} 
+                size={26} 
+                color={card.saved ? COLORS.accentGold : COLORS.textPrimary} 
+              />
+            </View>
+            <Text style={styles.actionLabel}>Save</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleShare} style={styles.actionBtn}>
-            <Text style={styles.actionIcon}>↗</Text>
+            <View style={styles.iconWrapper}>
+              <Ionicons name="share-social-outline" size={26} color={COLORS.textPrimary} />
+            </View>
+            <Text style={styles.actionLabel}>Share</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => onPlayAudio(card)} style={styles.actionBtn}>
-            <Text style={styles.actionIcon}>🔊</Text>
+            <View style={styles.iconWrapper}>
+              <Ionicons name="volume-high-outline" size={28} color={COLORS.textPrimary} />
+            </View>
+            <Text style={styles.actionLabel}>Audio</Text>
           </TouchableOpacity>
         </View>
 
         {/* Hint */}
-        <Text style={styles.hint}>tap verse for meaning</Text>
+        <View style={styles.hintContainer}>
+          <Text style={styles.hint}>tap verse for meaning</Text>
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -113,7 +132,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.xxl,
   },
   content: {
     maxWidth: 800,
@@ -121,6 +139,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+    paddingRight: 40, // offset for right actions
   },
   reference: {
     fontFamily: FONTS.sans,
@@ -131,22 +150,36 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   actions: {
-    flexDirection: 'row',
-    gap: SPACING.xl,
-    marginBottom: SPACING.lg,
+    position: 'absolute',
+    right: SPACING.lg,
+    bottom: height * 0.2, // centered-ish vertically in the lower half
+    alignItems: 'center',
+    gap: SPACING.lg,
   },
   actionBtn: {
-    padding: SPACING.md,
+    alignItems: 'center',
+    gap: 4,
   },
-  actionIcon: {
-    fontSize: 24,
+  iconWrapper: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  actionLabel: {
+    fontFamily: FONTS.sans,
+    fontSize: 10,
     color: COLORS.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
-  likedIcon: {
-    color: COLORS.danger,
-  },
-  savedIcon: {
-    color: COLORS.accentGold,
+  hintContainer: {
+    position: 'absolute',
+    bottom: 40,
   },
   hint: {
     fontFamily: FONTS.sans,
@@ -156,3 +189,4 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 });
+

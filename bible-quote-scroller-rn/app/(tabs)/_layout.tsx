@@ -4,14 +4,9 @@
 
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Text, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS } from '../../src/theme';
-
-function TabIcon({ label, focused }: { label: string; focused: boolean }) {
-  return (
-    <Text style={[styles.icon, focused && styles.iconFocused]}>{label}</Text>
-  );
-}
 
 export default function TabLayout() {
   return (
@@ -28,28 +23,36 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ focused }) => <TabIcon label="✝" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="saved"
-        options={{
-          title: 'Saved',
-          tabBarIcon: ({ focused }) => <TabIcon label="★" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="friends"
         options={{
           title: 'Friends',
-          tabBarIcon: ({ focused }) => <TabIcon label="👤" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? "people" : "people-outline"} size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon label="⚙" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? "person-circle" : "person-circle-outline"} size={26} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="saved"
+        options={{
+          title: 'Saved',
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? "bookmark" : "bookmark-outline"} size={24} color={color} />
+          ),
         }}
       />
     </Tabs>
@@ -61,19 +64,18 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.tabBar,
     borderTopColor: COLORS.tabBarBorder,
     borderTopWidth: 1,
-    height: 80,
-    paddingBottom: 16,
-    paddingTop: 8,
+    height: 85,
+    paddingBottom: 25,
+    paddingTop: 10,
+    elevation: 0,
+    shadowOpacity: 0,
   },
   tabLabel: {
     fontFamily: FONTS.sans,
-    fontSize: 11,
-  },
-  icon: {
-    fontSize: 22,
-    color: COLORS.textMuted,
-  },
-  iconFocused: {
-    color: COLORS.accentGold,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 4,
   },
 });
+
