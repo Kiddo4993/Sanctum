@@ -108,7 +108,7 @@ export default function QuoteCard({ verse }) {
                     {/* Save / Bookmark button */}
                     <TouchableOpacity
                         onPress={async () => {
-                            const newSaved = await toggleLike(verse);
+                            const newSaved = await toggleSave(verse);
                             setSaved(newSaved);
                             Animated.sequence([
                                 Animated.spring(bookmarkScale, { toValue: 1.4, useNativeDriver: true, speed: 28, bounciness: 16 }),
