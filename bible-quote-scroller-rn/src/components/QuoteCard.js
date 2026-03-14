@@ -20,11 +20,16 @@ const { width, height } = Dimensions.get("window");
 export default function QuoteCard({ verse }) {
   const { reference, content, genre } = verse;
   const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
   const heartScale = useRef(new Animated.Value(1)).current;
+  const bookmarkScale = useRef(new Animated.Value(1)).current;
   const glowOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    isLiked(verse.id).then(setLiked);
+    isLiked(verse.id).then((v) => {
+      setLiked(v);
+      setSaved(v);
+    });
   }, [verse.id]);
 
   const handlePress = () => {
@@ -34,6 +39,7 @@ export default function QuoteCard({ verse }) {
   const handleLike = async () => {
     const newLiked = await toggleLike(verse);
     setLiked(newLiked);
+    setSaved(newLiked); // like and save are the same action
 
     // Bounce + glow in/out
     Animated.parallel([
@@ -102,6 +108,34 @@ export default function QuoteCard({ verse }) {
             </Animated.View>
           </TouchableOpacity>
 
+          {/* Save / Bookmark button */}
+          <TouchableOpacity
+            onPress={async () => {
+              const newSaved = await toggleLike(verse);
+              setSaved(newSaved);
+              setLiked(newSaved);
+              Animated.sequence([
+                Animated.spring(bookmarkScale, { toValue: 1.4, useNativeDriver: true, speed: 28, bounciness: 16 }),
+                Animated.spring(bookmarkScale, { toValue: 1, useNativeDriver: true, speed: 14 }),
+              ]).start();
+              if (newSaved) recordInteraction(genre);
+            }}
+            activeOpacity={0.8}
+          >
+            <Animated.View
+              style={[
+                { transform: [{ scale: bookmarkScale }] },
+                saved && styles.bookmarkGlow,
+              ]}
+            >
+              <Ionicons
+                name={saved ? "bookmark" : "bookmark-outline"}
+                size={34}
+                color={saved ? COLORS.accentGold : "rgba(255,255,255,0.75)"}
+              />
+            </Animated.View>
+          </TouchableOpacity>
+
           {/* Share button (UI only) */}
           <TouchableOpacity activeOpacity={0.7}>
             <Ionicons name="share-social-outline" size={36} color="white" />
@@ -144,6 +178,13 @@ const styles = StyleSheet.create({
     shadowColor: "#ff2d55",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.55,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  bookmarkGlow: {
+    shadowColor: "#C9A84C",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
     shadowRadius: 8,
     elevation: 6,
   },

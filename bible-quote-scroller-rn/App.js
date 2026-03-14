@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import {
@@ -13,18 +13,19 @@ import {
 
 import ScrollFeed from './src/components/ScrollFeed';
 import EyeRestBanner from './src/components/EyeRestBanner';
-import { COLORS } from './src/theme';
+import NavBar from './src/components/NavBar';
+import SavedScreen from './src/components/SavedScreen';
+import { COLORS, FONTS } from './src/theme';
 
-// Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
     async function prepare() {
       try {
-        // Pre-load fonts
         await Font.loadAsync({
           Inter_400Regular,
           Inter_600SemiBold,
@@ -37,7 +38,6 @@ export default function App() {
         setAppIsReady(true);
       }
     }
-
     prepare();
   }, []);
 
@@ -47,14 +47,35 @@ export default function App() {
     }
   }, [appIsReady]);
 
-  if (!appIsReady) {
-    return null;
-  }
+  if (!appIsReady) return null;
+
+  const renderScreen = () => {
+    switch (activeTab) {
+      case 'home':
+        return (
+          <>
+            <ScrollFeed />
+            <EyeRestBanner />
+          </>
+        );
+      case 'saved':
+        return <SavedScreen />;
+      case 'friends':
+      case 'profile':
+        return (
+          <View style={styles.placeholder}>
+            <Text style={styles.placeholderText}>Coming soon</Text>
+          </View>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <View style={styles.container} onLayout={onLayoutRootView}>
-      <ScrollFeed />
-      <EyeRestBanner />
+      {renderScreen()}
+      <NavBar activeTab={activeTab} onTabPress={setActiveTab} />
     </View>
   );
 }
@@ -63,5 +84,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  placeholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeholderText: {
+    fontFamily: FONTS.sans,
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 16,
   },
 });
