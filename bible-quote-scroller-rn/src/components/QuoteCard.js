@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableWithoutFeedback, TouchableOpacity, Animated } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import RenderHtml from 'react-native-render-html';
 import { COLORS, FONTS } from '../theme';
 import { recordInteraction } from '../services/algorithm';
@@ -12,6 +13,7 @@ export default function QuoteCard({ verse }) {
     const { reference, content, genre } = verse;
     const [liked, setLiked] = useState(false);
     const heartScale = useRef(new Animated.Value(1)).current;
+    const glowOpacity = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         isLiked(verse.id).then(setLiked);
@@ -22,15 +24,23 @@ export default function QuoteCard({ verse }) {
     };
 
     const handleLike = async () => {
-        // Bounce animation
-        Animated.sequence([
-            Animated.spring(heartScale, { toValue: 1.4, useNativeDriver: true, speed: 30 }),
-            Animated.spring(heartScale, { toValue: 1, useNativeDriver: true, speed: 20 }),
-        ]).start();
-
         const newLiked = await toggleLike(verse);
         setLiked(newLiked);
-        if (newLiked) recordInteraction(genre); // extra signal for the algorithm
+
+        // Bounce + glow in/out
+        Animated.parallel([
+            Animated.sequence([
+                Animated.spring(heartScale, { toValue: 1.45, useNativeDriver: true, speed: 28, bounciness: 18 }),
+                Animated.spring(heartScale, { toValue: 1, useNativeDriver: true, speed: 14 }),
+            ]),
+            Animated.timing(glowOpacity, {
+                toValue: newLiked ? 1 : 0,
+                duration: 250,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
+        if (newLiked) recordInteraction(genre);
     };
 
     const tagsStyles = {
@@ -59,9 +69,17 @@ export default function QuoteCard({ verse }) {
 
                 {/* TikTok-style heart button */}
                 <TouchableOpacity style={styles.heartButton} onPress={handleLike} activeOpacity={0.8}>
-                    <Animated.Text style={[styles.heartIcon, { transform: [{ scale: heartScale }] }]}>
-                        {liked ? '❤️' : '🤍'}
-                    </Animated.Text>
+                    <Animated.View style={[
+                        styles.heartGlow,
+                        { opacity: glowOpacity, transform: [{ scale: heartScale }] },
+                    ]} />
+                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                        <Ionicons
+                            name={liked ? 'heart' : 'heart-outline'}
+                            size={38}
+                            color={liked ? '#ff2d55' : 'rgba(255,255,255,0.75)'}
+                        />
+                    </Animated.View>
                 </TouchableOpacity>
             </View>
         </TouchableWithoutFeedback>
@@ -94,9 +112,20 @@ const styles = StyleSheet.create({
         right: 24,
         bottom: 120,
         alignItems: 'center',
-        gap: 4,
+        justifyContent: 'center',
     },
-    heartIcon: {
-        fontSize: 36,
+    heartGlow: {
+        position: 'absolute',
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: '#ff2d55',
+        // iOS glow
+        shadowColor: '#ff2d55',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.9,
+        shadowRadius: 20,
+        // Android glow approximation
+        elevation: 12,
     },
 });
