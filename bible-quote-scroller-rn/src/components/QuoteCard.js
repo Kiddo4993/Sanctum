@@ -1,17 +1,36 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableWithoutFeedback } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableWithoutFeedback, TouchableOpacity, Animated } from 'react-native';
 import RenderHtml from 'react-native-render-html';
 import { COLORS, FONTS } from '../theme';
 import { recordInteraction } from '../services/algorithm';
+import { isLiked, toggleLike } from '../services/LikeService';
 
 const { width, height } = Dimensions.get('window');
 
 // Strip simple <p> tags if we don't want strict HTML rendering, but RenderHtml handles it well
 export default function QuoteCard({ verse }) {
     const { reference, content, genre } = verse;
+    const [liked, setLiked] = useState(false);
+    const heartScale = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        isLiked(verse.id).then(setLiked);
+    }, [verse.id]);
 
     const handlePress = () => {
         recordInteraction(genre);
+    };
+
+    const handleLike = async () => {
+        // Bounce animation
+        Animated.sequence([
+            Animated.spring(heartScale, { toValue: 1.4, useNativeDriver: true, speed: 30 }),
+            Animated.spring(heartScale, { toValue: 1, useNativeDriver: true, speed: 20 }),
+        ]).start();
+
+        const newLiked = await toggleLike(verse);
+        setLiked(newLiked);
+        if (newLiked) recordInteraction(genre); // extra signal for the algorithm
     };
 
     const tagsStyles = {
@@ -37,6 +56,13 @@ export default function QuoteCard({ verse }) {
                     />
                     <Text style={styles.referenceText}>{reference}</Text>
                 </View>
+
+                {/* TikTok-style heart button */}
+                <TouchableOpacity style={styles.heartButton} onPress={handleLike} activeOpacity={0.8}>
+                    <Animated.Text style={[styles.heartIcon, { transform: [{ scale: heartScale }] }]}>
+                        {liked ? '❤️' : '🤍'}
+                    </Animated.Text>
+                </TouchableOpacity>
             </View>
         </TouchableWithoutFeedback>
     );
@@ -62,5 +88,15 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
         letterSpacing: 1,
         textTransform: 'uppercase',
+    },
+    heartButton: {
+        position: 'absolute',
+        right: 24,
+        bottom: 120,
+        alignItems: 'center',
+        gap: 4,
+    },
+    heartIcon: {
+        fontSize: 36,
     },
 });
