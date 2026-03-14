@@ -8,15 +8,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { getLikedVerses, toggleLike } from "../services/LikeService";
+import { getSavedVerses, toggleSave } from "../services/LikeService";
 import { COLORS, FONTS } from "../theme";
 
 export default function SavedScreen() {
   const [saved, setSaved] = useState([]);
 
   const load = useCallback(async () => {
-    const likesMap = await getLikedVerses();
-    const sorted = Object.values(likesMap).sort((a, b) => b.likedAt - a.likedAt);
+    const savesMap = await getSavedVerses();
+    const sorted = Object.values(savesMap).sort((a, b) => b.savedAt - a.savedAt);
     setSaved(sorted);
   }, []);
 
@@ -25,7 +25,7 @@ export default function SavedScreen() {
   }, [load]);
 
   const handleRemove = async (verse) => {
-    await toggleLike(verse);
+    await toggleSave(verse);
     load(); // refresh list
   };
 
