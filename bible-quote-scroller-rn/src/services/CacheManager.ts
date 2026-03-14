@@ -14,7 +14,7 @@
 // ============================================================
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Quote, UserProfile, CacheEntry } from '../types';
+import type { Quote, Profile, CacheEntry } from '../types';
 
 // ── Cache Keys ──────────────────────────────────────────────
 const KEYS = {
@@ -105,13 +105,13 @@ export async function saveRecentQuotes(quotes: Quote[]): Promise<void> {
 
 // ── User Profile ────────────────────────────────────────────
 
-export async function loadUserProfile(): Promise<UserProfile | null> {
-  const entry = await get<CacheEntry<UserProfile>>(KEYS.USER_PROFILE);
+export async function loadProfile(): Promise<Profile | null> {
+  const entry = await get<CacheEntry<Profile>>(KEYS.USER_PROFILE);
   return entry?.data ?? null;
 }
 
-export async function saveUserProfile(profile: UserProfile): Promise<void> {
-  const entry: CacheEntry<UserProfile> = {
+export async function saveProfile(profile: Profile): Promise<void> {
+  const entry: CacheEntry<Profile> = {
     data: profile,
     cachedAt: new Date().toISOString(),
     expiresAt: null,
