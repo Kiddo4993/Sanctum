@@ -70,10 +70,9 @@ export default function QuoteCard({ verse }) {
                 {/* TikTok-style heart button */}
                 <TouchableOpacity style={styles.heartButton} onPress={handleLike} activeOpacity={0.8}>
                     <Animated.View style={[
-                        styles.heartGlow,
-                        { opacity: glowOpacity, transform: [{ scale: heartScale }] },
-                    ]} />
-                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                        { transform: [{ scale: heartScale }] },
+                        liked && styles.heartGlow,
+                    ]}>
                         <Ionicons
                             name={liked ? 'heart' : 'heart-outline'}
                             size={38}
@@ -115,17 +114,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     heartGlow: {
-        position: 'absolute',
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#ff2d55',
-        // iOS glow
         shadowColor: '#ff2d55',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.9,
-        shadowRadius: 20,
-        // Android glow approximation
-        elevation: 12,
+        shadowOpacity: 0.55,
+        shadowRadius: 8,
+        elevation: 6,
     },
 });
