@@ -253,12 +253,6 @@ This is a personal spiritual project, but thoughtful contributions are welcome. 
 
 ---
 
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
 ## 🙏 Credits
 
 - **Bible Text**: [scripture.api.bible](https://scripture.api.bible)
