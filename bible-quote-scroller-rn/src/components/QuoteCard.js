@@ -67,19 +67,31 @@ export default function QuoteCard({ verse }) {
                     <Text style={styles.referenceText}>{reference}</Text>
                 </View>
 
-                {/* TikTok-style heart button */}
-                <TouchableOpacity style={styles.heartButton} onPress={handleLike} activeOpacity={0.8}>
-                    <Animated.View style={[
-                        { transform: [{ scale: heartScale }] },
-                        liked && styles.heartGlow,
-                    ]}>
+                {/* Right-side action buttons */}
+                <View style={styles.actionButtons}>
+                    {/* Like button */}
+                    <TouchableOpacity onPress={handleLike} activeOpacity={0.8}>
+                        <Animated.View style={[
+                            { transform: [{ scale: heartScale }] },
+                            liked && styles.heartGlow,
+                        ]}>
+                            <Ionicons
+                                name={liked ? 'heart' : 'heart-outline'}
+                                size={38}
+                                color={liked ? '#ff2d55' : 'rgba(255,255,255,0.75)'}
+                            />
+                        </Animated.View>
+                    </TouchableOpacity>
+
+                    {/* Share button (UI only) */}
+                    <TouchableOpacity activeOpacity={0.7}>
                         <Ionicons
-                            name={liked ? 'heart' : 'heart-outline'}
-                            size={38}
-                            color={liked ? '#ff2d55' : 'rgba(255,255,255,0.75)'}
+                            name="share-social-outline"
+                            size={36}
+                            color="white"
                         />
-                    </Animated.View>
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                </View>
             </View>
         </TouchableWithoutFeedback>
     );
@@ -106,12 +118,12 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         textTransform: 'uppercase',
     },
-    heartButton: {
+    actionButtons: {
         position: 'absolute',
         right: 24,
         bottom: 120,
         alignItems: 'center',
-        justifyContent: 'center',
+        gap: 24,
     },
     heartGlow: {
         shadowColor: '#ff2d55',
