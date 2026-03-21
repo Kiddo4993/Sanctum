@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd bible-quote-scroller-rn && npx expo export -p web",
+  "outputDirectory": "bible-quote-scroller-rn/dist",
+  "installCommand": "cd bible-quote-scroller-rn && npm install"
+}

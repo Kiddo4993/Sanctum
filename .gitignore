@@ -1,0 +1,17 @@
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environments
+.env
+.env.local
+.env.*.local
+
+# expo
+.expo/
