@@ -28,6 +28,25 @@ export function recordInteraction(genre) {
   }
 }
 
+/**
+ * Merge stored profile weights into the current session.
+ * Called on app startup to restore user preferences.
+ */
+export function loadWeights(stored) {
+  for (const [genre, weight] of Object.entries(stored)) {
+    if (sessionState.weights[genre] !== undefined) {
+      sessionState.weights[genre] = weight;
+    }
+  }
+}
+
+/**
+ * Export current session weights (for persisting preferences).
+ */
+export function getWeights() {
+  return { ...sessionState.weights };
+}
+
 function pickGenre() {
   if (Math.random() < 0.4) {
     const genres = Object.keys(VERSE_POOL);
