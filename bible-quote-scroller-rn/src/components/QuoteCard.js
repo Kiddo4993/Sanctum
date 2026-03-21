@@ -11,7 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import RenderHtml from "react-native-render-html";
 import { COLORS, FONTS } from "../theme";
-import { recordInteraction } from "../services/algorithm";
+import { recordInteraction } from "../services/AlgorithmService";
 import { isLiked, toggleLike, isSaved, toggleSave } from "../services/LikeService";
 
 const { width, height } = Dimensions.get("window");
