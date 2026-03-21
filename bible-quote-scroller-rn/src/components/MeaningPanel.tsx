@@ -61,7 +61,7 @@ export default function MeaningPanel({ card, onClose }: Props) {
               {loading ? (
                 <ActivityIndicator
                   size="small"
-                  color={COLORS.accentGold}
+                  color={COLORS.accentPlatinum}
                   style={{ marginVertical: SPACING.xl }}
                 />
               ) : (
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   reference: {
     fontFamily: FONTS.sans,
     fontSize: 12,
-    color: COLORS.accentGold,
+    color: COLORS.accentPlatinum,
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: SPACING.md,

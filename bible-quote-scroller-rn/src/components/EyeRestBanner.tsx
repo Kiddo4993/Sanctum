@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   btn: {
-    backgroundColor: COLORS.accentGold,
+    backgroundColor: COLORS.accentPlatinum,
     paddingVertical: 14,
     paddingHorizontal: SPACING.lg,
     borderRadius: RADIUS.md,

@@ -157,7 +157,7 @@ export default function ScrollFeed() {
     <View style={styles.container}>
       {loading ? (
         <View style={styles.loading}>
-          <ActivityIndicator size="large" color={COLORS.accentGold} />
+          <ActivityIndicator size="large" color={COLORS.accentPlatinum} />
         </View>
       ) : (
         <FlatList

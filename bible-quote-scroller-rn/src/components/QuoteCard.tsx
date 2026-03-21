@@ -95,7 +95,7 @@ export default function QuoteCard({
               <Ionicons 
                 name={card.saved ? "bookmark" : "bookmark-outline"} 
                 size={26} 
-                color={card.saved ? COLORS.accentGold : COLORS.textPrimary} 
+                color={card.saved ? COLORS.accentPlatinum : COLORS.textPrimary} 
               />
             </View>
             <Text style={styles.actionLabel}>Save</Text>

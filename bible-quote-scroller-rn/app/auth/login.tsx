@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   form: { gap: SPACING.md },
   label: { fontFamily: FONTS.sansBold, fontSize: 12, color: COLORS.textSecondary, textTransform: 'uppercase', letterSpacing: 1 },
   input: { height: 52, backgroundColor: COLORS.surface, borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, color: COLORS.textPrimary, fontFamily: FONTS.sans, borderWidth: 1, borderColor: COLORS.borderLight, fontSize: 16 },
-  primaryBtn: { backgroundColor: COLORS.accentGold, paddingVertical: 16, borderRadius: RADIUS.md, alignItems: 'center', marginTop: SPACING.lg },
+  primaryBtn: { backgroundColor: COLORS.accentPlatinum, paddingVertical: 16, borderRadius: RADIUS.md, alignItems: 'center', marginTop: SPACING.lg },
   btnText: { fontFamily: FONTS.sansBold, fontSize: 16, color: '#000' },
   link: { alignItems: 'center', marginTop: SPACING.lg },
   linkText: { fontFamily: FONTS.sans, fontSize: 14, color: COLORS.textSecondary },

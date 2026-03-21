@@ -65,6 +65,22 @@ export function getLikedIds(): string[] {
   return [...likedIdsSet];
 }
 
+/** Fetch all liked quotes with full data (for the Liked screen). */
+export async function getLikedQuotes(userId: string) {
+  const { data, error } = await supabase
+    .from('likes')
+    .select('quote_id, created_at, quotes(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.warn('[LikeService] Failed to fetch liked quotes:', error.message);
+    return [];
+  }
+
+  return data ?? [];
+}
+
 /**
  * Toggle like/unlike with optimistic update.
  *

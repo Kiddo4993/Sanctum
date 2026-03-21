@@ -71,7 +71,7 @@ export default function MeaningScreen() {
           headerTitleStyle: { fontFamily: FONTS.sansBold },
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: SPACING.md }}>
-              <Text style={{ color: COLORS.accentGold, fontSize: 16 }}>Close</Text>
+              <Text style={{ color: COLORS.accentPlatinum, fontSize: 16 }}>Close</Text>
             </TouchableOpacity>
           ),
         }}
@@ -79,7 +79,7 @@ export default function MeaningScreen() {
       
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.accentGold} />
+          <ActivityIndicator size="large" color={COLORS.accentPlatinum} />
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   content: { padding: SPACING.xl, paddingBottom: 100 },
   verseText: { fontFamily: FONTS.serifItalic, fontSize: 24, color: COLORS.textPrimary, lineHeight: 36, textAlign: 'center', marginBottom: SPACING.md },
-  reference: { fontFamily: FONTS.sans, fontSize: 12, color: COLORS.accentGold, letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginBottom: SPACING.xl },
+  reference: { fontFamily: FONTS.sans, fontSize: 12, color: COLORS.accentPlatinum, letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginBottom: SPACING.xl },
   divider: { height: 1, backgroundColor: COLORS.borderLight, marginVertical: SPACING.lg },
   meaningHeading: { fontFamily: FONTS.serif, fontSize: 20, color: COLORS.textPrimary, marginBottom: SPACING.md },
   meaningText: { fontFamily: FONTS.sans, fontSize: 16, color: COLORS.textSecondary, lineHeight: 28 },

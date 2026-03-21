@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   playBtn: { padding: SPACING.sm },
-  playIcon: { fontSize: 20, color: COLORS.accentGold },
+  playIcon: { fontSize: 20, color: COLORS.accentPlatinum },
   label: {
     flex: 1,
     fontFamily: FONTS.sans,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   speedBtn: {
-    backgroundColor: COLORS.accentGoldDim,
+    backgroundColor: COLORS.accentPlatinumDim,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     borderRadius: RADIUS.sm,
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   speedText: {
     fontFamily: FONTS.sansBold,
     fontSize: 12,
-    color: COLORS.accentGold,
+    color: COLORS.accentPlatinum,
   },
   closeBtn: { padding: SPACING.sm },
   closeIcon: { fontSize: 14, color: COLORS.textMuted },

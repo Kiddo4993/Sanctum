@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   primaryBtn: {
-    backgroundColor: COLORS.accentGold,
+    backgroundColor: COLORS.accentPlatinum,
     paddingVertical: 14,
     borderRadius: RADIUS.md,
     alignItems: 'center',

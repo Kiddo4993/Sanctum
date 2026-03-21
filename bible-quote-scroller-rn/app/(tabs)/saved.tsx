@@ -1,5 +1,5 @@
 // ============================================================
-// Saved Screen — Grid of saved verses
+// Saved Screen — Grid of saved and liked verses
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getSavedQuotes } from '../../src/services/SaveService';
+import { getLikedQuotes } from '../../src/services/LikeService';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../src/theme';
 import type { Quote } from '../../src/types';
 
@@ -21,13 +22,18 @@ const GUEST_ID = 'guest';
 
 export default function SavedScreen() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'saved' | 'liked'>('saved');
   const [quotes, setQuotes] = useState<(Quote & { saved_at: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchSaved = useCallback(async () => {
+  const fetchVerses = useCallback(async () => {
+    setLoading(true);
     try {
-      const data = await getSavedQuotes(GUEST_ID);
+      const data = activeTab === 'saved'
+        ? await getSavedQuotes(GUEST_ID)
+        : await getLikedQuotes(GUEST_ID);
+        
       const mapped = data.map((row: any) => ({
         ...row.quotes,
         saved_at: row.created_at,
@@ -39,66 +45,75 @@ export default function SavedScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
-    fetchSaved();
-  }, [fetchSaved]);
+    fetchVerses();
+  }, [fetchVerses, activeTab]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchSaved();
-  }, [fetchSaved]);
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator color={COLORS.accentGold} />
-      </View>
-    );
-  }
-
-  if (quotes.length === 0) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.emptyIcon}>☆</Text>
-        <Text style={styles.emptyTitle}>No saved verses yet</Text>
-        <Text style={styles.emptyBody}>
-          Tap the star on any verse to save it here.
-        </Text>
-      </View>
-    );
-  }
+    fetchVerses();
+  }, [fetchVerses]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Saved Verses</Text>
-      <FlatList
-        data={quotes}
-        keyExtractor={(item) => item.id}
-        numColumns={1}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={COLORS.accentGold}
-          />
-        }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => router.push(`/meaning/${item.id}`)}
-          >
-            <Text style={styles.verseText} numberOfLines={3}>
-              "{item.text}"
-            </Text>
-            <Text style={styles.reference}>
-              {item.book} {item.chapter}:{item.verse}
-            </Text>
-          </TouchableOpacity>
-        )}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
+      {/* Top Segmented Controls */}
+      <View style={styles.topTabs}>
+        <TouchableOpacity 
+          style={[styles.topTab, activeTab === 'saved' && styles.activeTab]} 
+          onPress={() => setActiveTab('saved')}
+        >
+          <Text style={[styles.topTabText, activeTab === 'saved' && styles.activeTabText]}>SAVED</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.topTab, activeTab === 'liked' && styles.activeTab]} 
+          onPress={() => setActiveTab('liked')}
+        >
+          <Text style={[styles.topTabText, activeTab === 'liked' && styles.activeTabText]}>LIKED</Text>
+        </TouchableOpacity>
+      </View>
+
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator color={COLORS.accentPlatinum} />
+        </View>
+      ) : quotes.length === 0 ? (
+        <View style={styles.center}>
+          <Text style={styles.emptyIcon}>{activeTab === 'saved' ? '☆' : '♡'}</Text>
+          <Text style={styles.emptyTitle}>No {activeTab} verses yet</Text>
+          <Text style={styles.emptyBody}>
+            Tap the {activeTab === 'saved' ? 'bookmark' : 'heart'} on any verse to see it here.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={quotes}
+          keyExtractor={(item) => item.id}
+          numColumns={1}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={COLORS.accentPlatinum}
+            />
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => router.push(`/meaning/${item.id}`)}
+            >
+              <Text style={styles.verseText} numberOfLines={3}>
+                "{item.text}"
+              </Text>
+              <Text style={styles.reference}>
+                {item.book} {item.chapter}:{item.verse}
+              </Text>
+            </TouchableOpacity>
+          )}
+          contentContainerStyle={{ paddingBottom: 100 }}
+        />
+      )}
     </View>
   );
 }
@@ -111,17 +126,36 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
-    backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.xl,
   },
-  header: {
-    fontFamily: FONTS.serif,
-    fontSize: 28,
-    color: COLORS.textPrimary,
+  topTabs: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.xl,
     paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderLight,
+    marginBottom: SPACING.lg,
+  },
+  topTab: {
+    paddingVertical: SPACING.xs,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: COLORS.accentPlatinum,
+  },
+  topTabText: {
+    fontFamily: FONTS.sansBold,
+    fontSize: 12,
+    color: COLORS.textMuted,
+    letterSpacing: 1,
+  },
+  activeTabText: {
+    color: COLORS.textPrimary,
   },
   card: {
     backgroundColor: COLORS.card,
@@ -160,3 +194,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+

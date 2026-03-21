@@ -68,7 +68,7 @@ export default function ProfileScreen() {
   if (loading && !profile) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={COLORS.accentGold} />
+        <ActivityIndicator color={COLORS.accentPlatinum} />
       </View>
     );
   }
@@ -92,7 +92,6 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.header}>Profile</Text>
 
       <View style={styles.card}>
         {editing ? (
@@ -140,18 +139,18 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  content: { padding: SPACING.lg, paddingTop: 60, paddingBottom: 100 },
+  content: { paddingHorizontal: SPACING.lg, paddingBottom: 100 },
   center: { flex: 1, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', padding: SPACING.xl },
   header: { fontFamily: FONTS.serif, fontSize: 28, color: COLORS.textPrimary, marginBottom: SPACING.xl },
   card: { backgroundColor: COLORS.card, padding: SPACING.lg, borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.borderLight, marginBottom: SPACING.xl },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   name: { fontFamily: FONTS.sansBold, fontSize: 20, color: COLORS.textPrimary },
   username: { fontFamily: FONTS.sans, fontSize: 14, color: COLORS.textMuted, marginTop: 4 },
-  editText: { fontFamily: FONTS.sansBold, fontSize: 14, color: COLORS.accentGold },
+  editText: { fontFamily: FONTS.sansBold, fontSize: 14, color: COLORS.accentPlatinum },
   form: { gap: SPACING.sm },
   label: { fontFamily: FONTS.sansBold, fontSize: 12, color: COLORS.textSecondary, textTransform: 'uppercase', letterSpacing: 1 },
   input: { height: 48, backgroundColor: COLORS.surface, borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, color: COLORS.textPrimary, fontFamily: FONTS.sans, borderWidth: 1, borderColor: COLORS.borderLight, marginBottom: SPACING.md },
-  primaryBtn: { backgroundColor: COLORS.accentGold, paddingVertical: 14, borderRadius: RADIUS.md, alignItems: 'center' },
+  primaryBtn: { backgroundColor: COLORS.accentPlatinum, paddingVertical: 14, borderRadius: RADIUS.md, alignItems: 'center' },
   btnText: { fontFamily: FONTS.sansBold, fontSize: 16, color: '#000' },
   outlineBtn: { backgroundColor: 'transparent', paddingVertical: 14, borderRadius: RADIUS.md, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, marginTop: SPACING.sm, width: '100%' },
   outlineBtnText: { fontFamily: FONTS.sansBold, fontSize: 16, color: COLORS.textPrimary },

@@ -14,7 +14,7 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: COLORS.accentGold,
+        tabBarActiveTintColor: COLORS.accentPlatinum,
         tabBarInactiveTintColor: COLORS.textMuted,
         tabBarLabelStyle: styles.tabLabel,
       }}
@@ -37,15 +37,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused, color }) => (
-            <Ionicons name={focused ? "person-circle" : "person-circle-outline"} size={26} color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="saved"
         options={{
