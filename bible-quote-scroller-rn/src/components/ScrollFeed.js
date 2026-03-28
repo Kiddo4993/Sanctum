@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, Dimensions } from 'react-native';
 import { getVerse } from '../services/QuoteService';
-import { getNextVerseId, sessionState, recordInteraction } from '../services/AlgorithmService';
+import { getNextVerseId, sessionState, recordInteraction, initAlgorithm } from '../services/AlgorithmService';
+import { loadRecentQuotes } from '../services/CacheManager';
 import QuoteCard from './QuoteCard';
 import ScrollPrompt from './ScrollPrompt';
 import { COLORS } from '../theme';
@@ -40,9 +41,30 @@ export default function ScrollFeed() {
 
     useEffect(() => {
         const init = async () => {
-            await loadNext();
-            await loadNext();
-            await loadNext();
+            // Restore algorithm memory
+            await initAlgorithm();
+
+            // Load last viewed quote
+            const cachedQuotes = await loadRecentQuotes();
+            
+            if (cachedQuotes && cachedQuotes.length > 0) {
+                // Resume exact position by injecting the most recent quote as the first item
+                const lastQuote = cachedQuotes[cachedQuotes.length - 1];
+                const uniqueId = `${lastQuote.id}-${Date.now()}`;
+                
+                setCards([{ ...lastQuote, uniqueId, genre: lastQuote.genre || 'wisdom' }]);
+                sessionState.seen.add(lastQuote.id);
+
+                // Create a scroll buffer immediately below it
+                await loadNext();
+                await loadNext();
+            } else {
+                // Fallback for brand-new install
+                await loadNext();
+                await loadNext();
+                await loadNext();
+            }
+
             setLoadingInitial(false);
         };
         init();
