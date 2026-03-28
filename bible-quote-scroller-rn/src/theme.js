@@ -11,4 +11,5 @@ export const FONTS = {
     serifItalic: 'Lora_400Regular_Italic',
     sans: 'Inter_400Regular',
     sansBold: 'Inter_600SemiBold',
+    cinzel: 'Cinzel_600SemiBold',
 };
