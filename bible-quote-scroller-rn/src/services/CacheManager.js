@@ -19,6 +19,7 @@ const KEYS = {
   RECENT_QUOTES: '@sanctum/recent_quotes',
   SAVED_QUOTES: '@sanctum/saved_quotes',
   LIKED_QUOTE_IDS: '@sanctum/liked_quote_ids',
+  ALGORITHM_WEIGHTS: '@sanctum/algorithm_weights',
 };
 
 const MAX_RECENT_QUOTES = 20;
@@ -108,6 +109,21 @@ export async function saveLikedQuoteIds(ids) {
     cachedAt: new Date().toISOString(),
   };
   await set(KEYS.LIKED_QUOTE_IDS, entry);
+}
+
+// ── Algorithm Weights ─────────────────────────────────────────
+
+export async function loadAlgorithmWeights() {
+  const entry = await get(KEYS.ALGORITHM_WEIGHTS);
+  return entry?.data ?? null;
+}
+
+export async function saveAlgorithmWeights(weights) {
+  const entry = {
+    data: weights,
+    cachedAt: new Date().toISOString(),
+  };
+  await set(KEYS.ALGORITHM_WEIGHTS, entry);
 }
 
 // ── Utilities ───────────────────────────────────────────────
