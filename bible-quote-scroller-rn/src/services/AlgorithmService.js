@@ -7,6 +7,7 @@
 // ============================================================
 
 import * as Crypto from 'expo-crypto';
+import { loadAlgorithmWeights, saveAlgorithmWeights } from './CacheManager';
 
 export const VERSE_POOL = {
   wisdom: ['PSA.23.1', 'PRO.3.5', 'PRO.3.6', 'ECC.3.1', 'JOB.23.10'],
@@ -25,6 +26,7 @@ export const sessionState = {
 export function recordInteraction(genre) {
   if (sessionState.weights[genre] !== undefined) {
     sessionState.weights[genre] += 1;
+    saveAlgorithmWeights(sessionState.weights).catch(console.warn);
   }
 }
 
@@ -37,6 +39,20 @@ export function loadWeights(stored) {
     if (sessionState.weights[genre] !== undefined) {
       sessionState.weights[genre] = weight;
     }
+  }
+}
+
+/**
+ * Initialize session weights from local cache on app startup.
+ */
+export async function initAlgorithm() {
+  try {
+    const stored = await loadAlgorithmWeights();
+    if (stored) {
+      loadWeights(stored);
+    }
+  } catch (err) {
+    console.warn('[AlgorithmService] Failed to load weights:', err);
   }
 }
 
