@@ -10,11 +10,19 @@ import {
   Lora_400Regular,
   Lora_400Regular_Italic
 } from '@expo-google-fonts/lora';
+import {
+  Cinzel_600SemiBold
+} from '@expo-google-fonts/cinzel';
 
 import ScrollFeed from './src/components/ScrollFeed';
 import EyeRestBanner from './src/components/EyeRestBanner';
 import NavBar from './src/components/NavBar';
 import SavedScreen from './src/components/SavedScreen';
+import SignInScreen from './src/components/SignInScreen';
+import CreateAccountScreen from './src/components/CreateAccountScreen';
+import OnboardingScreen from './src/components/OnboardingScreen';
+import DiscoveryScreen from './src/components/DiscoveryScreen';
+import ProfileScreen from './src/components/ProfileScreen';
 import { COLORS, FONTS } from './src/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -22,6 +30,8 @@ SplashScreen.preventAutoHideAsync();
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
+  const [authScreen, setAuthScreen] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     async function prepare() {
@@ -31,6 +41,7 @@ export default function App() {
           Inter_600SemiBold,
           Lora_400Regular,
           Lora_400Regular_Italic,
+          Cinzel_600SemiBold,
         });
       } catch (e) {
         console.warn(e);
@@ -49,6 +60,59 @@ export default function App() {
 
   if (!appIsReady) return null;
 
+  // Auth screens
+  if (authScreen === null) {
+    return (
+      <View style={styles.container} onLayout={onLayoutRootView}>
+        <SignInScreen
+          onNavigateToCreate={() => setAuthScreen('create')}
+          onSignedIn={() => setAuthScreen('authenticated')}
+        />
+      </View>
+    );
+  }
+
+  if (authScreen === 'create') {
+    return (
+      <View style={styles.container} onLayout={onLayoutRootView}>
+        <CreateAccountScreen
+          onNavigateToSignIn={() => setAuthScreen(null)}
+          onAccountCreated={(userData) => {
+            setUser(userData);
+            setAuthScreen('onboarding');
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (authScreen === 'onboarding') {
+    return (
+      <View style={styles.container} onLayout={onLayoutRootView}>
+        <OnboardingScreen
+          onContinue={(reasons) => {
+            setUser(prev => ({ ...prev, reasons }));
+            setAuthScreen('discovery');
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (authScreen === 'discovery') {
+    return (
+      <View style={styles.container} onLayout={onLayoutRootView}>
+        <DiscoveryScreen
+          onContinue={(sources) => {
+            setUser(prev => ({ ...prev, sources }));
+            setAuthScreen('authenticated');
+          }}
+        />
+      </View>
+    );
+  }
+
+  // Main app
   const renderScreen = () => {
     switch (activeTab) {
       case 'home':
@@ -60,12 +124,15 @@ export default function App() {
         );
       case 'saved':
         return <SavedScreen />;
-      case 'friends':
       case 'profile':
         return (
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>Coming soon</Text>
-          </View>
+          <ProfileScreen
+            user={user}
+            onSignOut={() => {
+              setUser(null);
+              setAuthScreen(null);
+            }}
+          />
         );
       default:
         return null;
