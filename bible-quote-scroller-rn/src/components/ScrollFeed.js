@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, Dimensions } from 'react-native';
-import { fetchVerse } from '../services/bibleApi';
-import { getNextVerseId, sessionState, recordInteraction } from '../services/algorithm';
+import { getVerse } from '../services/QuoteService';
+import { getNextVerseId, sessionState, recordInteraction } from '../services/AlgorithmService';
 import QuoteCard from './QuoteCard';
 import ScrollPrompt from './ScrollPrompt';
 import { COLORS } from '../theme';
@@ -21,7 +21,7 @@ export default function ScrollFeed() {
 
         try {
             const { verseId, genre } = getNextVerseId();
-            const verse = await fetchVerse(verseId);
+            const verse = await getVerse(verseId, genre);
 
             setCards(prev => {
                 const uniqueId = `${verse.id}-${Date.now()}`;
