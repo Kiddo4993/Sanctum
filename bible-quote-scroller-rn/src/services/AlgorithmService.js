@@ -8,6 +8,7 @@
 
 import * as Crypto from 'expo-crypto';
 import { loadAlgorithmWeights, saveAlgorithmWeights } from './CacheManager';
+import { supabase } from './SupabaseClient';
 
 export const VERSE_POOL = {
   wisdom: ['PSA.23.1', 'PRO.3.5', 'PRO.3.6', 'ECC.3.1', 'JOB.23.10'],
@@ -23,10 +24,26 @@ export const sessionState = {
   scrollCount: 0,
 };
 
+// Debounce Supabase weight writes: at most once every 30 seconds per session
+const SYNC_DEBOUNCE_MS = 30_000;
+let lastSyncTime = 0;
+
 export function recordInteraction(genre) {
   if (sessionState.weights[genre] !== undefined) {
     sessionState.weights[genre] += 1;
     saveAlgorithmWeights(sessionState.weights).catch(console.warn);
+
+    const now = Date.now();
+    if (now - lastSyncTime >= SYNC_DEBOUNCE_MS) {
+      lastSyncTime = now;
+      supabase.auth.getSession().then(({ data }) => {
+        const userId = data?.session?.user?.id;
+        if (userId) {
+          supabase.from('profiles').update({ weights: sessionState.weights }).eq('id', userId)
+            .catch(e => console.warn('Silently failed to sync weight to Supabase', e));
+        }
+      });
+    }
   }
 }
 
@@ -44,17 +61,49 @@ export function loadWeights(stored) {
 
 /**
  * Initialize session weights from local cache on app startup.
+ * Upgrades to Supabase if logged in.
  */
 export async function initAlgorithm() {
   try {
-    const stored = await loadAlgorithmWeights();
-    if (stored) {
-      loadWeights(stored);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const userId = sessionData?.session?.user?.id;
+
+    if (userId) {
+      // Sync from Supabase
+      const { data } = await supabase.from('profiles').select('weights').eq('id', userId).single();
+      if (data?.weights) {
+        loadWeights(data.weights);
+      }
+    } else {
+      // Load local guest cache
+      const stored = await loadAlgorithmWeights();
+      if (stored) {
+        loadWeights(stored);
+      }
     }
   } catch (err) {
     console.warn('[AlgorithmService] Failed to load weights:', err);
   }
 }
+
+/**
+ * Promote session weights to Supabase profile on login.
+ */
+export const promoteSessionWeights = async (userId) => {
+  try {
+    const { data } = await supabase.from('profiles').select('weights').eq('id', userId).single();
+    const existing = data?.weights || {};
+    const session = sessionState.weights;
+    const merged = {};
+    for (const genre of Object.keys(session)) {
+      merged[genre] = (existing[genre] || 0) + session[genre];
+    }
+    await supabase.from('profiles').update({ weights: merged }).eq('id', userId);
+    console.log('[AlgorithmService] Successfully promoted session weights');
+  } catch (err) {
+    console.warn('[AlgorithmService] Failed to promote weights', err);
+  }
+};
 
 /**
  * Export current session weights (for persisting preferences).

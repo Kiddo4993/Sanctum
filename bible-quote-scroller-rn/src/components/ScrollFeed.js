@@ -4,17 +4,17 @@ import { getVerse } from '../services/QuoteService';
 import { getNextVerseId, sessionState, recordInteraction, initAlgorithm } from '../services/AlgorithmService';
 import { loadRecentQuotes } from '../services/CacheManager';
 import QuoteCard from './QuoteCard';
-import ScrollPrompt from './ScrollPrompt';
 import { COLORS } from '../theme';
 
 const { height } = Dimensions.get('window');
 
-export default function ScrollFeed() {
+export default function ScrollFeed({ onScrollIncrement, isPremium }) {
     const [cards, setCards] = useState([]);
-    const [showLoginNudge, setShowLoginNudge] = useState(false);
     const [loadingInitial, setLoadingInitial] = useState(true);
 
     const fetchingRef = useRef(false);
+    const onScrollIncrementRef = useRef(onScrollIncrement);
+    useEffect(() => { onScrollIncrementRef.current = onScrollIncrement; }, [onScrollIncrement]);
 
     const loadNext = useCallback(async () => {
         if (fetchingRef.current) return;
@@ -29,9 +29,7 @@ export default function ScrollFeed() {
                 return [...prev, { ...verse, uniqueId, genre }];
             });
 
-            if (sessionState.scrollCount === 10) {
-                setShowLoginNudge(true);
-            }
+            onScrollIncrementRef.current?.();
         } catch (e) {
             console.error('Failed to load next verse', e);
         } finally {
@@ -72,6 +70,15 @@ export default function ScrollFeed() {
 
     // Handle 3-second dwell time for visible items
     const dwellTimers = useRef(new Map());
+
+    useEffect(() => {
+        return () => {
+            for (const timer of dwellTimers.current.values()) {
+                clearTimeout(timer);
+            }
+            dwellTimers.current.clear();
+        };
+    }, []);
 
     const onViewableItemsChanged = useCallback(({ viewableItems }) => {
         // Clear old timers that are no longer viewable
@@ -125,10 +132,6 @@ export default function ScrollFeed() {
                     decelerationRate="fast"
                 />
             )}
-            <ScrollPrompt
-                visible={showLoginNudge}
-                onClose={() => setShowLoginNudge(false)}
-            />
         </View>
     );
 }

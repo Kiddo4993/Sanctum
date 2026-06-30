@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { COLORS, FONTS } from '../theme';
 
-export default function ScrollPrompt({ visible, onClose }) {
+export default function ScrollPrompt({ visible, onClose, onSignUp }) {
     return (
         <Modal
             animationType="slide"
@@ -18,8 +18,8 @@ export default function ScrollPrompt({ visible, onClose }) {
                             <Text style={styles.description}>Sign up to carry your personalized feed across devices.</Text>
 
                             <View style={styles.buttonContainer}>
-                                <TouchableOpacity style={styles.primaryButton} onPress={onClose}>
-                                    <Text style={styles.primaryButtonText}>Sign Up (Coming in Version 2)</Text>
+                                <TouchableOpacity style={styles.primaryButton} onPress={onSignUp ?? onClose}>
+                                    <Text style={styles.primaryButtonText}>Create Account</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.secondaryButton} onPress={onClose}>
                                     <Text style={styles.secondaryButtonText}>Not Now</Text>
