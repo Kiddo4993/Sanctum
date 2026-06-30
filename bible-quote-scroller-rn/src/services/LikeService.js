@@ -11,12 +11,14 @@
 // ============================================================
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DefaultPreference from 'react-native-default-preference';
 import {
   loadLikedQuoteIds,
   saveLikedQuoteIds,
   loadSavedQuoteIds,
   saveSavedQuoteIds,
 } from './CacheManager';
+import { supabase } from './SupabaseClient';
 
 const LIKES_KEY = '@sanctum_liked_verses';
 const SAVES_KEY = '@sanctum_saved_verses';
@@ -24,6 +26,11 @@ const SAVES_KEY = '@sanctum_saved_verses';
 // ── In-memory state (mirrors AsyncStorage for instant access) ──
 let likedIdsSet = null;
 let savedIdsSet = null;
+
+export function resetLikeServiceCache() {
+  likedIdsSet = null;
+  savedIdsSet = null;
+}
 
 async function ensureLikedInit() {
   if (likedIdsSet !== null) return;
@@ -49,6 +56,8 @@ const getMap = async (key) => {
     return {};
   }
 };
+
+const stripHtml = (html) => html.replace(/<[^>]*>/g, '').trim();
 
 // ── Likes (heart) ────────────────────────────────────────────────────────────
 
@@ -80,11 +89,30 @@ export const toggleLike = async (verse) => {
     newState = true;
   }
 
-  // Update both stores in parallel
+  // Update both stores in parallel locally
   await Promise.all([
     AsyncStorage.setItem(LIKES_KEY, JSON.stringify(map)),
     saveLikedQuoteIds([...likedIdsSet]),
   ]);
+
+  // Sync with Supabase (fire and forget)
+  supabase.auth.getSession().then(({ data: sessData }) => {
+    const userId = sessData?.session?.user?.id;
+    if (userId) {
+      if (newState) {
+        supabase.from('saved_quotes').insert({
+          user_id: userId,
+          verse_id: verse.id,
+          reference: verse.reference,
+          content: verse.content,
+          genre: verse.genre,
+          is_liked: true
+        }).catch(console.warn);
+      } else {
+        supabase.from('saved_quotes').delete().match({ user_id: userId, verse_id: verse.id, is_liked: true }).catch(console.warn);
+      }
+    }
+  });
 
   return newState;
 };
@@ -119,11 +147,37 @@ export const toggleSave = async (verse) => {
     newState = true;
   }
 
-  // Update both stores in parallel
+  // Create a delimited string for the Apple Widget
+  const quotesArray = Object.values(map).map(q => stripHtml(q.content));
+  const delimitedQuotes = quotesArray.length > 0 ? quotesArray.join('|||') : 'Save some quotes to see them here!';
+
+  // Update both stores in parallel locally, and push to Apple App Group
   await Promise.all([
     AsyncStorage.setItem(SAVES_KEY, JSON.stringify(map)),
     saveSavedQuoteIds([...savedIdsSet]),
+    DefaultPreference.setName('group.com.yourname.biblescroller')
+      .then(() => DefaultPreference.set('saved_quotes_widget_str', delimitedQuotes))
+      .catch(console.warn)
   ]);
+
+  // Sync with Supabase (fire and forget)
+  supabase.auth.getSession().then(({ data: sessData }) => {
+    const userId = sessData?.session?.user?.id;
+    if (userId) {
+      if (newState) {
+        supabase.from('saved_quotes').insert({
+          user_id: userId,
+          verse_id: verse.id,
+          reference: verse.reference,
+          content: verse.content,
+          genre: verse.genre,
+          is_liked: false
+        }).catch(console.warn);
+      } else {
+        supabase.from('saved_quotes').delete().match({ user_id: userId, verse_id: verse.id }).catch(console.warn);
+      }
+    }
+  });
 
   return newState;
 };

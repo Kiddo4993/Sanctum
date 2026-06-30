@@ -2,6 +2,7 @@
   "expo": {
     "name": "bible-quote-scroller-rn",
     "slug": "bible-quote-scroller-rn",
+    "scheme": "biblescroller",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,7 +27,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Sanctum to access your camera to scan friend QR codes."
+        }
+      ]
     ]
   }
 }
