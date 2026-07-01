@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import { supabase } from '../services/SupabaseClient';
 import { COLORS, FONTS } from '../theme';
@@ -7,15 +8,15 @@ import { COLORS, FONTS } from '../theme';
 export default function ProfileScreen() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     async function fetchProfile() {
       const { data: sessionData } = await supabase.auth.getSession();
       const userId = sessionData?.session?.user?.id;
-      
+
       if (userId) {
         let { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-        // Fallback for new users without a username yet
         if (!data?.username) {
           data = { ...data, username: sessionData.session.user.email?.split('@')[0] || 'friend' };
         }
@@ -45,35 +46,44 @@ export default function ProfileScreen() {
   const qrValue = `biblescroller://add-friend/${profile.username}`;
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={[styles.container, { paddingTop: insets.top + 24 }]}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Your Profile</Text>
       <Text style={styles.subtitle}>@{profile.username}</Text>
 
       <View style={styles.qrContainer}>
-        <QRCode value={qrValue} size={220} color={COLORS.background} backgroundColor="#FFFFFF" />
+        <QRCode value={qrValue} size={200} color={COLORS.background} backgroundColor="#FFFFFF" />
       </View>
       <Text style={styles.instruction}>Have a friend scan this code to connect!</Text>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   center: {
-    flex: 1, 
-    justifyContent: 'center', 
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
+    padding: 32,
   },
   text: {
     color: COLORS.textSecondary,
     fontFamily: FONTS.sans,
-    fontSize: 16
+    fontSize: 16,
+    textAlign: 'center',
   },
-  container: {
+  scroll: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  container: {
     alignItems: 'center',
-    paddingTop: 80,
+    paddingHorizontal: 32,
+    paddingBottom: 120,
   },
   title: {
     fontFamily: FONTS.serif,
@@ -85,17 +95,23 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sans,
     fontSize: 18,
     color: COLORS.accentGold,
-    marginBottom: 60,
+    marginBottom: 48,
   },
   qrContainer: {
     padding: 24,
     backgroundColor: '#FFF',
-    borderRadius: 16,
+    borderRadius: 20,
     marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   instruction: {
     fontFamily: FONTS.sans,
     fontSize: 14,
     color: COLORS.textSecondary,
-  }
+    textAlign: 'center',
+  },
 });

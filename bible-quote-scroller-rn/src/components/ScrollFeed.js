@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Dimensions } from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { getVerse } from '../services/QuoteService';
 import { getNextVerseId, sessionState, recordInteraction, initAlgorithm } from '../services/AlgorithmService';
 import { loadRecentQuotes } from '../services/CacheManager';
 import QuoteCard from './QuoteCard';
 import { COLORS } from '../theme';
 
-const { height } = Dimensions.get('window');
-
 export default function ScrollFeed({ onScrollIncrement, isPremium }) {
+    const { height } = useWindowDimensions();
     const [cards, setCards] = useState([]);
     const [loadingInitial, setLoadingInitial] = useState(true);
 

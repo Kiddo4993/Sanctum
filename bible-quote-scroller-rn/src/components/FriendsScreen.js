@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../services/SupabaseClient';
 import { COLORS, FONTS } from '../theme';
 import ProfileScreen from './ProfileScreen';
@@ -11,6 +12,7 @@ import ChatScreen from './ChatScreen';
 
 // view: 'list' | 'qr' | 'scanner' | 'chat'
 export default function FriendsScreen() {
+  const insets = useSafeAreaInsets();
   const [view, setView] = useState('list');
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,10 +63,13 @@ export default function FriendsScreen() {
     setView('chat');
   }
 
+  const backRowStyle = [styles.backRow, { paddingTop: insets.top + 8 }];
+  const headerStyle = [styles.header, { paddingTop: insets.top + 8 }];
+
   if (view === 'qr') {
     return (
       <View style={styles.flex}>
-        <TouchableOpacity style={styles.backRow} onPress={() => setView('list')}>
+        <TouchableOpacity style={backRowStyle} onPress={() => setView('list')}>
           <Ionicons name="arrow-back" size={22} color={COLORS.accentGold} />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
@@ -76,7 +81,7 @@ export default function FriendsScreen() {
   if (view === 'scanner') {
     return (
       <View style={styles.flex}>
-        <TouchableOpacity style={styles.backRow} onPress={() => setView('list')}>
+        <TouchableOpacity style={backRowStyle} onPress={() => setView('list')}>
           <Ionicons name="arrow-back" size={22} color={COLORS.accentGold} />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
@@ -88,8 +93,8 @@ export default function FriendsScreen() {
   if (view === 'chat') {
     return (
       <View style={styles.flex}>
-        <View style={styles.chatHeader}>
-          <TouchableOpacity style={styles.backRow} onPress={() => setView('list')}>
+        <View style={[styles.chatHeader, { paddingTop: insets.top + 8 }]}>
+          <TouchableOpacity style={styles.chatBackBtn} onPress={() => setView('list')}>
             <Ionicons name="arrow-back" size={22} color={COLORS.accentGold} />
           </TouchableOpacity>
           <Text style={styles.chatHeaderTitle}>@{activeFriendUsername}</Text>
@@ -102,7 +107,7 @@ export default function FriendsScreen() {
   // 'list' view
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={headerStyle}>
         <Text style={styles.title}>Friends</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity style={styles.headerBtn} onPress={() => setView('qr')}>
@@ -155,11 +160,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   title: {
     fontFamily: FONTS.serif,
@@ -176,7 +180,6 @@ const styles = StyleSheet.create({
   backRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 56,
     paddingHorizontal: 20,
     paddingBottom: 12,
     gap: 6,
@@ -189,9 +192,14 @@ const styles = StyleSheet.create({
   chatHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.12)',
+    paddingHorizontal: 12,
     paddingBottom: 12,
+    gap: 8,
+  },
+  chatBackBtn: {
+    padding: 4,
   },
   chatHeaderTitle: {
     fontFamily: FONTS.sans,

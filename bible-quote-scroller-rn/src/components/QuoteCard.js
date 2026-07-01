@@ -3,22 +3,26 @@ import {
     View,
     Text,
     StyleSheet,
-    Dimensions,
+    useWindowDimensions,
     TouchableWithoutFeedback,
     TouchableOpacity,
     Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import RenderHtml from "react-native-render-html";
 import { COLORS, FONTS } from "../theme";
 import { recordInteraction } from "../services/AlgorithmService";
 import { isLiked, toggleLike, isSaved, toggleSave } from "../services/LikeService";
 
-const { width, height } = Dimensions.get("window");
+// Approximate NavBar height: icon row (26) + paddingTop (12) + paddingBottom (dynamic, ~8-34)
+const NAV_BAR_BASE = 50;
 
-// Strip simple <p> tags if we don't want strict HTML rendering, but RenderHtml handles it well
 export default function QuoteCard({ verse }) {
     const { reference, content, genre } = verse;
+    const { width, height } = useWindowDimensions();
+    const insets = useSafeAreaInsets();
+
     const [liked, setLiked] = useState(false);
     const [saved, setSaved] = useState(false);
     const heartScale = useRef(new Animated.Value(1)).current;
@@ -38,7 +42,6 @@ export default function QuoteCard({ verse }) {
         const newLiked = await toggleLike(verse);
         setLiked(newLiked);
 
-        // Bounce + glow in/out
         Animated.parallel([
             Animated.sequence([
                 Animated.spring(heartScale, {
@@ -67,18 +70,21 @@ export default function QuoteCard({ verse }) {
         p: {
             color: COLORS.textPrimary,
             fontFamily: FONTS.serifItalic,
-            fontSize: width > 600 ? 32 : 24, // Responsive roughly
-            lineHeight: width > 600 ? 44 : 34,
+            fontSize: width > 600 ? 28 : 22,
+            lineHeight: width > 600 ? 40 : 32,
             textAlign: "center",
-            marginBottom: 24,
+            marginBottom: 20,
             fontStyle: "italic",
         },
     };
 
+    // Action buttons sit above the nav bar
+    const actionButtonBottom = Math.max(insets.bottom, 8) + NAV_BAR_BASE + 16;
+
     return (
         <TouchableWithoutFeedback onPress={handlePress}>
-            <View style={styles.cardContainer}>
-                <View style={styles.contentWrapper}>
+            <View style={[styles.cardContainer, { width, height }]}>
+                <View style={[styles.contentWrapper, { paddingTop: insets.top + 16 }]}>
                     <RenderHtml
                         contentWidth={width - 64}
                         source={{ html: content }}
@@ -88,9 +94,8 @@ export default function QuoteCard({ verse }) {
                 </View>
 
                 {/* Right-side action buttons */}
-                <View style={styles.actionButtons}>
-                    {/* Like button */}
-                    <TouchableOpacity onPress={handleLike} activeOpacity={0.8}>
+                <View style={[styles.actionButtons, { bottom: actionButtonBottom }]}>
+                    <TouchableOpacity onPress={handleLike} activeOpacity={0.8} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                         <Animated.View
                             style={[
                                 { transform: [{ scale: heartScale }] },
@@ -99,13 +104,12 @@ export default function QuoteCard({ verse }) {
                         >
                             <Ionicons
                                 name={liked ? "heart" : "heart-outline"}
-                                size={38}
+                                size={36}
                                 color={liked ? "#ff2d55" : "rgba(255,255,255,0.75)"}
                             />
                         </Animated.View>
                     </TouchableOpacity>
 
-                    {/* Save / Bookmark button */}
                     <TouchableOpacity
                         onPress={async () => {
                             const newSaved = await toggleSave(verse);
@@ -116,6 +120,7 @@ export default function QuoteCard({ verse }) {
                             ]).start();
                         }}
                         activeOpacity={0.8}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
                         <Animated.View
                             style={[
@@ -125,15 +130,14 @@ export default function QuoteCard({ verse }) {
                         >
                             <Ionicons
                                 name={saved ? "bookmark" : "bookmark-outline"}
-                                size={34}
+                                size={32}
                                 color={saved ? COLORS.accentGold : "rgba(255,255,255,0.75)"}
                             />
                         </Animated.View>
                     </TouchableOpacity>
 
-                    {/* Share button (UI only) */}
-                    <TouchableOpacity activeOpacity={0.7}>
-                        <Ionicons name="share-social-outline" size={36} color="white" />
+                    <TouchableOpacity activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <Ionicons name="share-social-outline" size={34} color="rgba(255,255,255,0.75)" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -143,31 +147,27 @@ export default function QuoteCard({ verse }) {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        width: width,
-        height: height,
         justifyContent: "center",
         alignItems: "center",
         paddingHorizontal: 32,
-        paddingVertical: 48,
     },
     contentWrapper: {
-        maxWidth: 800,
+        maxWidth: 500,
         width: "100%",
         alignItems: "center",
     },
     referenceText: {
         fontFamily: FONTS.sans,
-        fontSize: 16,
+        fontSize: 13,
         color: COLORS.textSecondary,
-        letterSpacing: 1,
+        letterSpacing: 1.5,
         textTransform: "uppercase",
     },
     actionButtons: {
         position: "absolute",
-        right: 24,
-        bottom: 120,
+        right: 20,
         alignItems: "center",
-        gap: 24,
+        gap: 28,
     },
     heartGlow: {
         shadowColor: "#ff2d55",

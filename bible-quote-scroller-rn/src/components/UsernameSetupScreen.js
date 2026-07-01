@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../services/SupabaseClient';
 import { COLORS, FONTS } from '../theme';
 
@@ -11,6 +12,7 @@ export default function UsernameSetupScreen({ userId, onComplete }) {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const insets = useSafeAreaInsets();
 
   const handleSubmit = async () => {
     const trimmed = username.trim().toLowerCase();
@@ -42,7 +44,7 @@ export default function UsernameSetupScreen({ userId, onComplete }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.inner}>
+      <View style={[styles.inner, { paddingTop: insets.top + 16 }]}>
         <Text style={styles.title}>Choose your username</Text>
         <Text style={styles.subtitle}>
           This is how friends will find and add you in Sanctum.
@@ -90,6 +92,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 32,
+    paddingBottom: 32,
   },
   title: {
     fontFamily: FONTS.serif,

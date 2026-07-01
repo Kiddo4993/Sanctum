@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../services/SupabaseClient';
 import { COLORS, FONTS } from '../theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,81 +8,116 @@ import { Ionicons } from '@expo/vector-icons';
 export default function AuthScreen() {
 
   const handleOAuthLogin = async (provider) => {
-    // In React Native Expo, make sure the redirectUrl is configured properly in Supabase dashboard
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider,
       options: {
-        redirectTo: 'biblescroller://login-callback', // Adjust this scheme
+        redirectTo: 'biblescroller://login-callback',
       }
     });
 
     if (error) {
       Alert.alert('Login Failed', error.message);
     } else {
-      // Handled automatically by supabase instance if url is caught by linking
       console.log('OAuth URL launched:', data?.url);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Sanctum</Text>
-      <Text style={styles.subtitle}>Save your verses, connect with friends, and preserve your algorithm.</Text>
-      
-      <TouchableOpacity style={styles.buttonContainer} onPress={() => handleOAuthLogin('google')}>
-        <Ionicons name="logo-google" size={24} color={COLORS.textPrimary} style={styles.icon} />
-        <Text style={styles.buttonText}>Continue with Google</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.logoArea}>
+          <Text style={styles.logoMark}>✦</Text>
+          <Text style={styles.title}>Sanctum</Text>
+          <Text style={styles.subtitle}>
+            Save your verses, connect with friends,{'\n'}and preserve your algorithm.
+          </Text>
+        </View>
 
-      <TouchableOpacity style={styles.buttonContainer} onPress={() => handleOAuthLogin('facebook')}>
-        <Ionicons name="logo-facebook" size={24} color={COLORS.textPrimary} style={styles.icon} />
-        <Text style={styles.buttonText}>Continue with Facebook</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.buttons}>
+          <TouchableOpacity style={styles.buttonContainer} onPress={() => handleOAuthLogin('google')}>
+            <Ionicons name="logo-google" size={22} color={COLORS.textPrimary} style={styles.icon} />
+            <Text style={styles.buttonText}>Continue with Google</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.buttonContainer} onPress={() => handleOAuthLogin('facebook')}>
+            <Ionicons name="logo-facebook" size={22} color={COLORS.textPrimary} style={styles.icon} />
+            <Text style={styles.buttonText}>Continue with Facebook</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.legal}>
+          By continuing, you agree to our Terms of Service and Privacy Policy.
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingHorizontal: 28,
+    paddingTop: 48,
+    paddingBottom: 32,
+  },
+  logoArea: {
+    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
-    padding: 32,
+  },
+  logoMark: {
+    fontSize: 40,
+    color: COLORS.accentGold,
+    marginBottom: 16,
   },
   title: {
     fontFamily: FONTS.serif,
-    fontSize: 32,
-    color: '#F0F0F0',
+    fontSize: 38,
+    color: COLORS.textPrimary,
     marginBottom: 16,
-    textAlign: 'center',
   },
   subtitle: {
     fontFamily: FONTS.sans,
     fontSize: 16,
-    color: '#888888',
-    marginBottom: 48,
+    color: COLORS.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
+  },
+  buttons: {
+    gap: 12,
+    marginBottom: 24,
   },
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    justifyContent: 'center'
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+    minHeight: 56,
   },
   buttonText: {
-    color: '#F0F0F0',
-    fontSize: 18,
-    fontFamily: FONTS.sans,
-    fontWeight: '600',
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontFamily: FONTS.sansBold,
   },
   icon: {
     position: 'absolute',
-    left: 24,
-  }
+    left: 20,
+  },
+  legal: {
+    fontFamily: FONTS.sans,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.25)',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
 });
