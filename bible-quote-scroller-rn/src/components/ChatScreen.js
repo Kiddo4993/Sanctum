@@ -1,5 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import {
+  View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet,
+  Alert, KeyboardAvoidingView, Platform,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listenToMessages, sendMessage } from '../services/MessagingService';
 import { supabase } from '../services/SupabaseClient';
 import { COLORS, FONTS } from '../theme';
@@ -11,6 +15,8 @@ export default function ChatScreen({ chatId: propChatId }) {
   const [input, setInput] = useState('');
   const [userId, setUserId] = useState(null);
   const mountedRef = useRef(true);
+  const listRef = useRef(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     mountedRef.current = true;
@@ -21,7 +27,11 @@ export default function ChatScreen({ chatId: propChatId }) {
     }).catch(console.warn);
 
     const unsubscribe = listenToMessages(chatId, (newMessages) => {
-      if (mountedRef.current) setMessages(newMessages);
+      if (mountedRef.current) {
+        setMessages(newMessages);
+        // Scroll to bottom on new message
+        setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+      }
     });
 
     return () => {
@@ -58,40 +68,107 @@ export default function ChatScreen({ chatId: propChatId }) {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
       <FlatList
+        ref={listRef}
         data={messages}
         keyExtractor={item => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
       />
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
         <TextInput
           style={styles.textInput}
           placeholder="Message..."
-          placeholderTextColor="#888"
+          placeholderTextColor="#666"
           value={input}
           onChangeText={setInput}
           onSubmitEditing={handleSend}
+          returnKeyType="send"
+          multiline={false}
         />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-          <Ionicons name="send" size={24} color={COLORS.accentGold} />
+        <TouchableOpacity
+          style={[styles.sendButton, !input.trim() && styles.sendButtonDisabled]}
+          onPress={handleSend}
+          disabled={!input.trim()}
+        >
+          <Ionicons name="send" size={22} color={input.trim() ? COLORS.accentGold : '#444'} />
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  list: { padding: 16 },
-  bubble: { padding: 12, borderRadius: 16, marginBottom: 12, maxWidth: '80%' },
-  myBubble: { backgroundColor: 'rgba(255, 255, 255, 0.1)', alignSelf: 'flex-end', borderBottomRightRadius: 4 },
-  theirBubble: { backgroundColor: 'rgba(201, 168, 76, 0.2)', alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
-  messageText: { color: COLORS.textPrimary, fontFamily: FONTS.sans, fontSize: 16 },
-  verseQuote: { borderLeftWidth: 2, borderColor: COLORS.accentGold, paddingLeft: 8, marginBottom: 4 },
-  quoteRef: { color: COLORS.accentGold, fontFamily: FONTS.serif, fontStyle: 'italic' },
-  inputContainer: { flexDirection: 'row', padding: 16, borderTopWidth: 1, borderColor: '#333' },
-  textInput: { flex: 1, color: '#FFF', backgroundColor: '#1C1C1E', borderRadius: 20, paddingHorizontal: 16, height: 42 },
-  sendButton: { justifyContent: 'center', marginLeft: 12 }
+  list: { padding: 16, paddingBottom: 8 },
+  bubble: {
+    padding: 12,
+    borderRadius: 18,
+    marginBottom: 8,
+    maxWidth: '80%',
+  },
+  myBubble: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: 4,
+  },
+  theirBubble: {
+    backgroundColor: 'rgba(201,168,76,0.18)',
+    alignSelf: 'flex-start',
+    borderBottomLeftRadius: 4,
+  },
+  messageText: {
+    color: COLORS.textPrimary,
+    fontFamily: FONTS.sans,
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  verseQuote: {
+    borderLeftWidth: 2,
+    borderColor: COLORS.accentGold,
+    paddingLeft: 8,
+    marginBottom: 4,
+  },
+  quoteRef: {
+    color: COLORS.accentGold,
+    fontFamily: FONTS.serif,
+    fontStyle: 'italic',
+    fontSize: 13,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: COLORS.background,
+  },
+  textInput: {
+    flex: 1,
+    color: COLORS.textPrimary,
+    backgroundColor: '#1C1C1E',
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 8,
+    fontSize: 15,
+    fontFamily: FONTS.sans,
+    minHeight: 40,
+  },
+  sendButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+    width: 40,
+    height: 40,
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
+  },
 });

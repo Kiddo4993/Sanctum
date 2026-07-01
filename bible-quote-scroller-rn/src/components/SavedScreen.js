@@ -4,9 +4,9 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { getSavedVerses, toggleSave } from "../services/LikeService";
 import { COLORS, FONTS } from "../theme";

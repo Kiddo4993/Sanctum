@@ -1,6 +1,7 @@
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TABS = [
   { key: "home", icon: "home-outline", activeIcon: "home" },
@@ -10,8 +11,10 @@ const TABS = [
 ];
 
 export default function NavBar({ activeTab, onTabPress }) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab.key;
         return (
@@ -43,12 +46,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(13,13,13,0.92)",
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "rgba(255,255,255,0.1)",
-    paddingBottom: Platform.OS === "ios" ? 28 : 12,
     paddingTop: 12,
   },
   tab: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 4,
+    minHeight: 44,
   },
 });

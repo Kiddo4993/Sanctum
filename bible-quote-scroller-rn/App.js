@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
 import { supabase } from './src/services/SupabaseClient';
 import * as SplashScreen from 'expo-splash-screen';
@@ -185,25 +186,29 @@ export default function App() {
   // Unauthenticated: show auth screen
   if (session === null) {
     return (
-      <ErrorBoundary>
-        <View style={styles.container} onLayout={onLayoutRootView}>
-          <AuthScreen />
-        </View>
-      </ErrorBoundary>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <View style={styles.container} onLayout={onLayoutRootView}>
+            <AuthScreen />
+          </View>
+        </ErrorBoundary>
+      </SafeAreaProvider>
     );
   }
 
   // First-time login: user hasn't set a username yet
   if (needsUsername) {
     return (
-      <ErrorBoundary>
-        <View style={styles.container} onLayout={onLayoutRootView}>
-          <UsernameSetupScreen
-            userId={session.user.id}
-            onComplete={() => setNeedsUsername(false)}
-          />
-        </View>
-      </ErrorBoundary>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <View style={styles.container} onLayout={onLayoutRootView}>
+            <UsernameSetupScreen
+              userId={session.user.id}
+              onComplete={() => setNeedsUsername(false)}
+            />
+          </View>
+        </ErrorBoundary>
+      </SafeAreaProvider>
     );
   }
 
@@ -228,7 +233,8 @@ export default function App() {
   };
 
   return (
-    <ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
       <View style={styles.container} onLayout={onLayoutRootView}>
         {renderScreen()}
         <NavBar activeTab={activeTab} onTabPress={handleTabPress} />
@@ -243,7 +249,8 @@ export default function App() {
           }}
         />
       </View>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
 
