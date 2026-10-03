@@ -42,7 +42,7 @@ CREATE POLICY "Public profiles are viewable by everyone."
 
 CREATE POLICY "Users can insert their own profile."
   ON profiles FOR INSERT
-  WITH CHECK ( auth.uid() = id );
+  WITH CHECK ( auth.uid() = id AND is_premium IS NOT TRUE );
 
 CREATE POLICY "Users can update own profile."
   ON profiles FOR UPDATE
@@ -58,9 +58,18 @@ CREATE POLICY "Users can manage their own saved_quotes."
   ON saved_quotes FOR ALL
   USING ( auth.uid() = user_id );
 
--- Users can manage their own friends
-CREATE POLICY "Users can manage their own friends."
-  ON friends FOR ALL
+-- Either side of a friendship can see it or remove it, but you can only add
+-- rows where you are user_id, so nobody can put themselves on someone else's list.
+CREATE POLICY "Users can see their friendships."
+  ON friends FOR SELECT
+  USING ( auth.uid() = user_id OR auth.uid() = friend_id );
+
+CREATE POLICY "Users can add their own friends."
+  ON friends FOR INSERT
+  WITH CHECK ( auth.uid() = user_id );
+
+CREATE POLICY "Users can remove their friendships."
+  ON friends FOR DELETE
   USING ( auth.uid() = user_id OR auth.uid() = friend_id );
 
 -- ── Migrations (run these if tables already exist) ─────────────────────────────
@@ -68,3 +77,11 @@ CREATE POLICY "Users can manage their own friends."
 -- ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT false;
 -- ALTER TABLE saved_quotes ADD CONSTRAINT IF NOT EXISTS saved_quotes_user_verse_unique UNIQUE (user_id, verse_id);
 -- ALTER TABLE friends ADD CONSTRAINT IF NOT EXISTS friends_user_friend_unique UNIQUE (user_id, friend_id);
+
+-- Policy fix (run once if the old policies are already in your project):
+-- DROP POLICY IF EXISTS "Users can manage their own friends." ON friends;
+-- CREATE POLICY "Users can see their friendships." ON friends FOR SELECT USING ( auth.uid() = user_id OR auth.uid() = friend_id );
+-- CREATE POLICY "Users can add their own friends." ON friends FOR INSERT WITH CHECK ( auth.uid() = user_id );
+-- CREATE POLICY "Users can remove their friendships." ON friends FOR DELETE USING ( auth.uid() = user_id OR auth.uid() = friend_id );
+-- DROP POLICY IF EXISTS "Users can insert their own profile." ON profiles;
+-- CREATE POLICY "Users can insert their own profile." ON profiles FOR INSERT WITH CHECK ( auth.uid() = id AND is_premium IS NOT TRUE );
